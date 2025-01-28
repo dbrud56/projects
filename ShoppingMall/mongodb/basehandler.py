@@ -1,23 +1,13 @@
-from dataclasses import dataclass
-
-from .dbhandler import MongoDBHandler
+from pymongo import MongoClient
 
 
-@dataclass
-class Product:
-    product_id: int
-    name: str
-    price: int
-    stock: int
+class BaseDatabaseHandler:
+    def __init__(self, db_name: str, collection_name: str, uri: str = "mongodb://localhost:27017/"):
+        self.client = MongoClient(uri)
+        self.collection = self.client[db_name][collection_name]
 
-
-class ProductDatabaseHandler(MongoDBHandler):
-    def __init__(self):
-        self.collection = self.get_collection("Products")
-
-    def insert(self, product: Product):
-        product_dict = product.__dict__
-        result = self.collection.insert_one(product_dict)
+    def insert(self, product: dict):
+        result = self.collection.insert_one(product)
         return result.inserted_id
 
     def find(self, product_id: int):
